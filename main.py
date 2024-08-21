@@ -9,7 +9,7 @@ import numpy as np
 """### Paso 2: Preparar el Dataset"""
 
 # Directorio donde están las imágenes
-train_dir = "C:/Users/FERNANDO/Documents/api_tesis/PLAGAS"
+train_dir = "PLAGAS"
 
 # Crear un generador de datos con aumento de datos
 datagen = tf.keras.preprocessing.image.ImageDataGenerator(
