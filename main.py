@@ -1,8 +1,4 @@
-
-from sklearn.metrics import confusion_matrix, roc_curve, auc
 from sklearn.preprocessing import label_binarize
-import seaborn as sns
-import matplotlib.pyplot as plt
 import tensorflow as tf
 import numpy as np
 
@@ -77,60 +73,6 @@ model.fit(train_generator,
           validation_data=validation_generator,
           epochs=50,
           callbacks=[early_stopping, lr_schedule])
-
-"""### Paso 3.1"""
-
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.metrics import confusion_matrix, classification_report
-# Después de entrenar el modelo procedemos a generar la matriz de confusión
-# Generar predicciones
-y_pred = model.predict(validation_generator)
-y_pred_classes = np.argmax(y_pred, axis=1)
-y_true = validation_generator.classes
-
-# Generar y mostrar la Matriz de Confusión
-cm = confusion_matrix(y_true, y_pred_classes)
-
-# Mostrar la matriz de confusión con etiquetas y una barra de color
-plt.figure(figsize=(10, 8))
-sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=validation_generator.class_indices.keys(), yticklabels=validation_generator.class_indices.keys())
-plt.ylabel('True Label')
-plt.xlabel('Predicted Label')
-plt.title('Confusion Matrix')
-plt.show()
-
-# Generar y mostrar el informe de clasificación
-report = classification_report(y_true, y_pred_classes, target_names=validation_generator.class_indices.keys())
-print("Classification Report:\n", report)
-print('')
-print('CURVA ROC')
-print('')
-# Calcular y mostrar la Curva ROC
-n_classes = len(validation_generator.class_indices)
-y_true_bin = label_binarize(y_true, classes=range(n_classes))
-y_pred_bin = y_pred
-
-fpr = dict()
-tpr = dict()
-roc_auc = dict()
-for i in range(n_classes):
-    fpr[i], tpr[i], _ = roc_curve(y_true_bin[:, i], y_pred_bin[:, i])
-    roc_auc[i] = auc(fpr[i], tpr[i])
-
-plt.figure(figsize=(10, 8))
-for i in range(n_classes):
-    plt.plot(fpr[i], tpr[i], label=f'{list(validation_generator.class_indices.keys())[i]} (AUC = {roc_auc[i]:.2f})')
-
-plt.plot([0, 1], [0, 1], 'k--', lw=2)
-plt.xlim([0.0, 1.0])
-plt.ylim([0.0, 1.0])
-plt.xlabel('Tasa de Falsos Positivos (False Positive Rate)')
-plt.ylabel('Tasa de Verdaderos Positivos (True Positive Rate)')
-plt.title('Curva ROC para Clasificación de Plagas en Cultivo de Brócoli')
-plt.legend(loc="lower right")
-plt.grid(True)
-plt.show()
 
 """### Paso 4: Cargar el Modelo y Hacer Predicciones"""
 
