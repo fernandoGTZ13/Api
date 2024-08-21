@@ -1,6 +1,12 @@
 from sklearn.preprocessing import label_binarize
 import tensorflow as tf
 import numpy as np
+import os
+import uvicorn
+from fastapi import FastAPI, UploadFile, File, HTTPException
+from PIL import Image
+from io import BytesIO
+import matplotlib.pyplot as plt
 
 """### Paso 2: Preparar el Dataset"""
 
@@ -106,23 +112,14 @@ def predict_image(img_path, threshold=0.7):
     return predicted_label
 
 
-import base64
-from fastapi import FastAPI, UploadFile, File, HTTPException
-from PIL import Image
-from io import BytesIO
-import matplotlib.pyplot as plt
-import uvicorn
-import threading
-
 app = FastAPI()
 
-#Url para saber si la api esta activa
-
+# URL para saber si la API está activa
 @app.get("/")
 def read_root():
-    return {"message": "¡Bienvenido a la API REST con FastAPI desde el movil v4"}
+    return {"message": "¡Bienvenido a la API REST con FastAPI desde el móvil v4"}
 
-#Metodo para recibir la imagen
+# Método para recibir la imagen
 @app.post("/upload/")
 async def upload_image(file: UploadFile = File(...)):
     try:
@@ -147,8 +144,7 @@ async def upload_image(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-# Ejecutar Uvicorn en segundo plano en el puerto 8000
-def run():
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-
-threading.Thread(target=run).start()
+# Ejecutar Uvicorn en el puerto especificado por Render
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
