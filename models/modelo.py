@@ -67,13 +67,13 @@ model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4),
 # Preparar generadores con tamaño de lote reducido
 batch_size = 16  # Tamaño de lote reducido
 train_generator = tf.keras.preprocessing.image.ImageDataGenerator().flow_from_directory(
-    train_dir,
+    train_dir, 
     target_size=(160, 160),
     batch_size=batch_size,
     class_mode='categorical'
 )
 validation_generator = tf.keras.preprocessing.image.ImageDataGenerator().flow_from_directory(
-    validation_dir, 
+    train_dir, 
     target_size=(160, 160),
     batch_size=batch_size,
     class_mode='categorical'
