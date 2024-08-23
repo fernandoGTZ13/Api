@@ -12,11 +12,11 @@ train_dir = "./PLAGAS"
 # Crear un generador de datos con aumento de datos
 datagen = tf.keras.preprocessing.image.ImageDataGenerator(
     rescale=1./255,
-    rotation_range=20,
-    width_shift_range=0.2,
-    height_shift_range=0.2,
-    shear_range=0.2,
-    zoom_range=0.2,
+    rotation_range=10,  # Reducir el rango de rotación
+    width_shift_range=0.1,  # Reducir el rango de desplazamiento
+    height_shift_range=0.1,
+    shear_range=0.1,  # Reducir el rango de cizalladura
+    zoom_range=0.1,  # Reducir el rango de zoom
     horizontal_flip=True,
     fill_mode='nearest',
     validation_split=0.2
@@ -24,7 +24,7 @@ datagen = tf.keras.preprocessing.image.ImageDataGenerator(
 
 train_generator = datagen.flow_from_directory(
     train_dir,
-    target_size=(160, 160),
+    target_size=(224, 224),
     batch_size=8,
     class_mode='categorical',
     subset='training'
@@ -32,7 +32,7 @@ train_generator = datagen.flow_from_directory(
 
 validation_generator = datagen.flow_from_directory(
     train_dir,
-    target_size=(160, 160),
+    target_size=(224, 224),
     batch_size=8,
     class_mode='categorical',
     subset='validation'
