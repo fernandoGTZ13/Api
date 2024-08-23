@@ -39,45 +39,55 @@ validation_generator = datagen.flow_from_directory(
 )
 
 # Cargar el modelo base preentrenado
-base_model = tf.keras.applications.MobileNetV2(input_shape=(224, 224, 3),
+base_model = tf.keras.applications.MobileNetV2(input_shape=(160, 160, 3),
                                                include_top=False,
                                                weights='imagenet')
 
 # Congelar las primeras capas del modelo base
 base_model.trainable = True
-# Elegir cuántas capas descongelar
-fine_tune_at = 100  # Puedes ajustar este número
+fine_tune_at = 150  # Ajuste para descongelar menos capas
 for layer in base_model.layers[:fine_tune_at]:
     layer.trainable = False
-
-lr_schedule = tf.keras.callbacks.LearningRateScheduler(lambda epoch: 1e-4 * 10**(epoch / 20))
-
-
 
 # Crear el modelo completo
 model = tf.keras.Sequential([
     base_model,
     tf.keras.layers.GlobalAveragePooling2D(),
-    tf.keras.layers.Dense(1024, activation='relu'),
-    tf.keras.layers.Dropout(0.5),  # Añadir Dropout
-    tf.keras.layers.BatchNormalization(),  # Añadir Batch Normalization
+    tf.keras.layers.Dense(512, activation='relu'),  # Reducción de neuronas
+    tf.keras.layers.Dropout(0.5),
+    tf.keras.layers.BatchNormalization(),
     tf.keras.layers.Dense(len(train_generator.class_indices), activation='softmax')
 ])
-
 
 # Compilar el modelo con una tasa de aprendizaje baja
 model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4),
               loss='categorical_crossentropy',
               metrics=['accuracy'])
 
+# Preparar generadores con tamaño de lote reducido
+batch_size = 16  # Tamaño de lote reducido
+train_generator = tf.keras.preprocessing.image.ImageDataGenerator().flow_from_directory(
+    train_dir, 
+    target_size=(160, 160),
+    batch_size=batch_size,
+    class_mode='categorical'
+)
+validation_generator = tf.keras.preprocessing.image.ImageDataGenerator().flow_from_directory(
+    validation_dir, 
+    target_size=(160, 160),
+    batch_size=batch_size,
+    class_mode='categorical'
+)
+
+# Ajustar el entrenamiento
+early_stopping = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
+lr_schedule = tf.keras.callbacks.LearningRateScheduler(lambda epoch: 1e-4 * 10**(epoch / 20))
 
 # Entrenar el modelo
-early_stopping = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
 model.fit(train_generator,
           validation_data=validation_generator,
           epochs=50,
           callbacks=[early_stopping, lr_schedule])
-
 
 # Después de entrenar el modelo procedemos a generar la matriz de confusión
 # Generar predicciones
